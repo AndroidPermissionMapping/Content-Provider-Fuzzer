@@ -1,0 +1,3 @@
+[submodule "cp-fuzzing-serialization"]
+	path = cp-fuzzing-serialization
+	url = git@projects.cispa.saarland:parthipan.ramesh/cp-fuzzing-serialization.git

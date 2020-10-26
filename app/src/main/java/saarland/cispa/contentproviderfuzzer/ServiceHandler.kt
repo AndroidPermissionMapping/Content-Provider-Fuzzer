@@ -4,8 +4,8 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.util.Log
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
+import saarland.cispa.cp.fuzzing.serialization.FuzzingResult
+import saarland.cispa.cp.fuzzing.serialization.ResolverCallUri
 
 
 class ServiceHandler(
@@ -21,24 +21,27 @@ class ServiceHandler(
 
     override fun handleMessage(msg: Message) {
         Log.v(TAG, "Parsing magic values")
-        val fuzzingData: List<FuzzingData> = inputAndResultsIO.loadFuzzingData()
-        val failedPermissionChecks: MutableList<FuzzingData> = mutableListOf()
+        val fuzzingData: List<ResolverCallUri> = inputAndResultsIO.loadFuzzingData()
+
+        val results: MutableList<FuzzingResult> = mutableListOf()
 
         Log.v(TAG, "Starting fuzzing")
         for (data in fuzzingData) {
 
+            var r: FuzzingResult? = null
             try {
                 resolverCaller.call(data)
-            } catch (e: SecurityException) {
-                failedPermissionChecks.add(data)
-            } catch (e: NullPointerException) {
-                Log.v(TAG, "NullPointerException for: $data")
-            } catch (e: UnsupportedOperationException) {
-                // No need to take care of it
+                r = FuzzingResult(data, null)
+            } catch (e: Exception) {
+                r = FuzzingResult(data, e.toString())
+            } finally {
+                if (r != null) {
+                    results.add(r)
+                }
             }
         }
 
-        inputAndResultsIO.saveResults(failedPermissionChecks)
+        inputAndResultsIO.saveResults(results)
         Log.v(TAG, "Finished fuzzing")
     }
 }

@@ -1,10 +1,11 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
 
-apply plugin: 'kotlin-android'
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
 
-apply plugin: 'kotlin-android-extensions'
-
-apply plugin: 'kotlinx-serialization'
+    id 'kotlinx-serialization'
+}
 
 android {
     compileSdkVersion 29
@@ -24,16 +25,21 @@ android {
         }
     }
 }
-kotlin_version
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(":cp-fuzzing-serialization")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0-RC"
 
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.core:core-ktx:1.0.2'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+}
+
+task startService(type: Exec) {
+    dependsOn 'installDebug'
+    commandLine 'adb', 'shell', 'am', 'start-foreground-service', 'saarland.cispa.contentproviderfuzzer/.FuzzService'
 }

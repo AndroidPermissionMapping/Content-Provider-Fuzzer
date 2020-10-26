@@ -1,8 +1,10 @@
 package saarland.cispa.contentproviderfuzzer
 
 import android.content.ContentResolver
+import android.net.Uri
 import android.util.Log
 
+import saarland.cispa.cp.fuzzing.serialization.ResolverCallUri
 
 class ResolverCaller(private val resolver: ContentResolver) {
 
@@ -10,15 +12,16 @@ class ResolverCaller(private val resolver: ContentResolver) {
         private const val TAG = "ResolverCaller"
     }
 
-    fun call(data: FuzzingData) {
-        when (data) {
-            is ResolverCallUri -> {
+    fun call(data: ResolverCallUri) {
+        /* when (data) {
+            is ResolverCallUri -> {*/
                 try {
-                    resolver.call(data.uri, data.method, data.arg, data.extras)
+                    val uri = Uri.parse(data.uri)
+                    resolver.call(uri, data.method, data.arg, null)
                 } catch (e: IllegalArgumentException) {
                     Log.v(TAG, "Unknown uri: ${data.uri}")
                 }
-            }
+            /* }
 
             is ResolverCallAuthority -> {
                 resolver.call(data.authority, data.method, data.arg, data.extras)
@@ -40,6 +43,6 @@ class ResolverCaller(private val resolver: ContentResolver) {
             is ResolverDelete -> {
                 resolver.delete(data.uri, data.where, data.selectionArgs)
             }
-        }
+        } */
     }
 }
