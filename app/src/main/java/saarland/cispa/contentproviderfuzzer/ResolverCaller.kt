@@ -1,10 +1,12 @@
 package saarland.cispa.contentproviderfuzzer
 
 import android.content.ContentResolver
+import android.content.ContentValues
 import android.net.Uri
-import android.util.Log
-
+import saarland.cispa.cp.fuzzing.serialization.ContentProviderApi
+import saarland.cispa.cp.fuzzing.serialization.ResolverCallInsert
 import saarland.cispa.cp.fuzzing.serialization.ResolverCallUri
+import saarland.cispa.cp.fuzzing.serialization.ResolverQueryApi1
 
 class ResolverCaller(private val resolver: ContentResolver) {
 
@@ -12,25 +14,34 @@ class ResolverCaller(private val resolver: ContentResolver) {
         private const val TAG = "ResolverCaller"
     }
 
-    fun call(data: ResolverCallUri) {
-        /* when (data) {
-            is ResolverCallUri -> {*/
-                try {
-                    val uri = Uri.parse(data.uri)
-                    resolver.call(uri, data.method, data.arg, null)
-                } catch (e: IllegalArgumentException) {
-                    Log.v(TAG, "Unknown uri: ${data.uri}")
-                }
-            /* }
+    fun process(data: ContentProviderApi) {
+        val uri = Uri.parse(data.uri)
+        when (data) {
+            is ResolverCallUri -> resolver.call(uri, data.method, data.arg, null)
 
-            is ResolverCallAuthority -> {
+            is ResolverQueryApi1 -> {
+                resolver.query(
+                    uri,
+                    data.projection,
+                    data.selection,
+                    data.selectionArgs,
+                    data.sortOrder
+                )?.close()
+            }
+
+            is ResolverCallInsert -> {
+                val contentValues = ContentValues().apply {
+                    putNull(data.contentValue.key)
+                }
+
+                resolver.insert(uri, contentValues)
+            }
+
+            /* is ResolverCallAuthority -> {
                 resolver.call(data.authority, data.method, data.arg, data.extras)
             }
 
-            is ResolverQuery -> {
-                val cursor = resolver.query(data.uri, data.projection, data.queryArgs, null)
-                cursor?.close()
-            }
+
 
             is ResolverInsert -> {
                 resolver.insert(data.uri, data.contentValues)
@@ -42,7 +53,7 @@ class ResolverCaller(private val resolver: ContentResolver) {
 
             is ResolverDelete -> {
                 resolver.delete(data.uri, data.where, data.selectionArgs)
-            }
-        } */
+            } */
+        }
     }
 }

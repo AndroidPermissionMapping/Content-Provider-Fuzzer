@@ -2,7 +2,6 @@ package saarland.cispa.contentproviderfuzzer
 
 import android.content.Context
 import saarland.cispa.cp.fuzzing.serialization.*
-import saarland.cispa.cp.fuzzing.serialization.ResolverCallUri
 import java.io.File
 
 
@@ -13,11 +12,15 @@ class InputAndResultsIO(private val context: Context) {
         private const val RESULTS_FILE_NAME = "results.json"
     }
 
-    fun loadFuzzingData(): List<ResolverCallUri> {
+    fun loadFuzzingData(): List<ContentProviderApi> {
         val appDataDir = context.filesDir
         val inputFile = File(appDataDir, MAGIC_VALUES_FILE_NAME)
 
-        return FuzzingDataSerializer.deserialize(inputFile)
+        val fuzzingDataList: List<FuzzingData> = FuzzingDataSerializer.deserialize(inputFile)
+
+        val results = mutableListOf<ContentProviderApi>()
+        fuzzingDataList.forEach { fuzzingData -> results.addAll(fuzzingData.data) }
+        return results
     }
 
     fun saveResults(results: List<FuzzingResult>) {
