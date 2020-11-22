@@ -3,16 +3,9 @@ package saarland.cispa.contentproviderfuzzer
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.net.Uri
-import saarland.cispa.cp.fuzzing.serialization.ContentProviderApi
-import saarland.cispa.cp.fuzzing.serialization.ResolverCallInsert
-import saarland.cispa.cp.fuzzing.serialization.ResolverCallUri
-import saarland.cispa.cp.fuzzing.serialization.ResolverQueryApi1
+import saarland.cispa.cp.fuzzing.serialization.*
 
 class ResolverCaller(private val resolver: ContentResolver) {
-
-    companion object {
-        private const val TAG = "ResolverCaller"
-    }
 
     fun process(data: ContentProviderApi) {
         val uri = Uri.parse(data.uri)
@@ -37,23 +30,18 @@ class ResolverCaller(private val resolver: ContentResolver) {
                 resolver.insert(uri, contentValues)
             }
 
-            /* is ResolverCallAuthority -> {
-                resolver.call(data.authority, data.method, data.arg, data.extras)
+
+            is ResolverCallUpdate -> {
+                val contentValues = ContentValues().apply {
+                    putNull(data.contentValue.key)
+                }
+
+                resolver.update(uri, contentValues, data.selection, null)
             }
 
-
-
-            is ResolverInsert -> {
-                resolver.insert(data.uri, data.contentValues)
+            is ResolverCallDelete -> {
+                resolver.delete(uri, data.selection, null)
             }
-
-            is ResolverUpdate -> {
-                resolver.update(data.uri, data.contentValues, data.where, data.selectionArgs)
-            }
-
-            is ResolverDelete -> {
-                resolver.delete(data.uri, data.where, data.selectionArgs)
-            } */
         }
     }
 }
