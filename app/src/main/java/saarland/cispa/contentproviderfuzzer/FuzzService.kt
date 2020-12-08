@@ -36,11 +36,11 @@ class FuzzService : Service() {
             // Get the HandlerThread's Looper and use it for our Handler
             serviceLooper = looper
 
-            val inputFileParser = InputAndResultsIO(this@FuzzService)
+            val inputFileParser = FuzzingDataManager(this@FuzzService)
             val resolverCaller = ResolverCaller(contentResolver)
             serviceHandler = ServiceHandler(
                 this@FuzzService,
-                looper, inputFileParser, resolverCaller
+                looper, inputFileParser, resolverCaller, this
             )
         }
 
@@ -69,7 +69,7 @@ class FuzzService : Service() {
             serviceHandler?.sendMessage(msg)
         }
 
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     override fun onDestroy() {

@@ -5,7 +5,7 @@ import saarland.cispa.cp.fuzzing.serialization.*
 import java.io.File
 
 
-class InputAndResultsIO(private val context: Context) {
+class FuzzingDataManager(private val context: Context) {
 
     companion object {
         private const val MAGIC_VALUES_FILE_NAME = "magic_values.json"
