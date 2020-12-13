@@ -19,6 +19,8 @@ class FuzzService : Service() {
 
         private const val NOTIFICATION_CHANNEL_ID = "Default"
         private const val ONGOING_NOTIFICATION_ID: Int = 57983245
+
+        private const val BUNDLE_KEY_SERVER_PORT = "server_port"
     }
 
     private var serviceLooper: Looper? = null
@@ -36,14 +38,16 @@ class FuzzService : Service() {
             // Get the HandlerThread's Looper and use it for our Handler
             serviceLooper = looper
 
-            val inputFileParser = FuzzingDataManager(this@FuzzService)
             val resolverCaller = ResolverCaller(contentResolver)
+            val contentProviderFuzzer = ContentProviderFuzzer(resolverCaller)
+
             serviceHandler = ServiceHandler(
                 this@FuzzService,
-                looper, inputFileParser, resolverCaller, this
+                looper, contentProviderFuzzer, this
             )
         }
 
+        Log.v(TAG, "End onCreate()")
     }
 
     private fun startAsForegroundService() {
@@ -64,10 +68,26 @@ class FuzzService : Service() {
 
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        serviceHandler?.obtainMessage()?.also { msg ->
-            msg.arg1 = startId
-            serviceHandler?.sendMessage(msg)
+        Log.v(TAG, "SS onStartCommand()")
+
+        if (intent != null) {
+            Log.v(TAG, intent.toString())
         }
+
+        if (intent != null && intent.hasExtra(BUNDLE_KEY_SERVER_PORT)) {
+            val serverPort = intent.getIntExtra(BUNDLE_KEY_SERVER_PORT, 0)
+
+            Log.v(TAG, "Got server port $serverPort")
+
+            serviceHandler?.obtainMessage()?.also { msg ->
+                msg.arg1 = serverPort
+
+                serviceHandler?.sendMessage(msg)
+            }
+        }
+
+        Log.v(TAG, "EE onStartCommand()")
+
 
         return START_NOT_STICKY
     }
