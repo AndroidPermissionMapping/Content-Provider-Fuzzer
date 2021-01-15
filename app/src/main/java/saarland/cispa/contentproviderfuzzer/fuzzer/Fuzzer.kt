@@ -1,24 +1,21 @@
-package saarland.cispa.contentproviderfuzzer
+package saarland.cispa.contentproviderfuzzer.fuzzer
 
+import kotlinx.serialization.Serializable
+import saarland.cispa.contentproviderfuzzer.ResolverCaller
 import saarland.cispa.cp.fuzzing.serialization.ContentProviderApi
-import saarland.cispa.cp.fuzzing.serialization.FuzzingData
-import saarland.cispa.cp.fuzzing.serialization.FuzzingDataSerializer
 import saarland.cispa.cp.fuzzing.serialization.FuzzingResult
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import java.nio.charset.StandardCharsets
 
-class ContentProviderFuzzer(private val resolverCaller: ResolverCaller) {
+@Serializable
+data class FuzzingJob(val batchRequests: Boolean, val fuzzingRequests: List<ContentProviderApi>)
 
-    fun loadFuzzingData(fuzzingInput: String): List<ContentProviderApi> {
-        val fuzzingDataList: List<FuzzingData> = FuzzingDataSerializer.deserialize(fuzzingInput)
+abstract class Fuzzer(private val resolverCaller: ResolverCaller) {
 
-        val results = mutableListOf<ContentProviderApi>()
-        fuzzingDataList.forEach { fuzzingData -> results.addAll(fuzzingData.data) }
-        return results
-    }
+    abstract fun fuzzApis(job: FuzzingJob)
 
-    fun fuzzApi(api: ContentProviderApi): FuzzingResult {
+    protected fun fuzzApi(api: ContentProviderApi): FuzzingResult {
         return try {
             resolverCaller.process(api)
             FuzzingResult(api, null, null)

@@ -1,4 +1,4 @@
-package saarland.cispa.contentproviderfuzzer
+package saarland.cispa.contentproviderfuzzer.service
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -10,6 +10,8 @@ import android.os.HandlerThread
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import saarland.cispa.contentproviderfuzzer.FuzzingOrchestrator
+import saarland.cispa.contentproviderfuzzer.ResolverCaller
 
 
 class FuzzService : Service() {
@@ -39,11 +41,11 @@ class FuzzService : Service() {
             serviceLooper = looper
 
             val resolverCaller = ResolverCaller(contentResolver)
-            val contentProviderFuzzer = ContentProviderFuzzer(resolverCaller)
+            val orchestrator = FuzzingOrchestrator(resolverCaller)
 
             serviceHandler = ServiceHandler(
                 this@FuzzService,
-                looper, contentProviderFuzzer, this
+                looper, this, orchestrator
             )
         }
 

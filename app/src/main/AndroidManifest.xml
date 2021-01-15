@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <service android:name=".FuzzService">
+        <service android:name=".service.FuzzService">
             <intent-filter>
                 <action android:name="saarland.cispa.contentproviderfuzzer.FuzzService" />
             </intent-filter>
