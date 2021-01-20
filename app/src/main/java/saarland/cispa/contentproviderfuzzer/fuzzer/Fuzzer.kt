@@ -13,6 +13,10 @@ data class FuzzingJob(val batchRequests: Boolean, val fuzzingRequests: List<Cont
 
 abstract class Fuzzer(private val resolverCaller: ResolverCaller) {
 
+    companion object {
+        const val MESSAGE_ACK = "Ack"
+    }
+
     abstract fun fuzzApis(job: FuzzingJob)
 
     protected fun fuzzApi(api: ContentProviderApi): FuzzingResult {

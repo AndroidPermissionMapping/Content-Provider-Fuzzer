@@ -14,7 +14,6 @@ class SerialFuzzer(
 
     companion object {
         private const val TAG = "SerialFuzzer"
-        private const val MESSAGE_ACK = "Ack"
     }
 
     override fun fuzzApis(job: FuzzingJob) {
