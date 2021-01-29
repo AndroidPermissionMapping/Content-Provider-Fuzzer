@@ -1,8 +1,9 @@
 package saarland.cispa.contentproviderfuzzer.fuzzer
 
-import android.util.Log
+import kotlinx.serialization.json.Json
 import saarland.cispa.contentproviderfuzzer.ConnectionToDynamo
 import saarland.cispa.contentproviderfuzzer.ResolverCaller
+import saarland.cispa.cp.fuzzing.serialization.ContentProviderApi
 import saarland.cispa.cp.fuzzing.serialization.FuzzingResult
 import saarland.cispa.cp.fuzzing.serialization.FuzzingResultSerializer
 
@@ -12,29 +13,21 @@ class SerialFuzzer(
     resolverCaller: ResolverCaller
 ) : Fuzzer(resolverCaller) {
 
-    companion object {
-        private const val TAG = "SerialFuzzer"
-    }
-
     override fun fuzzApis(job: FuzzingJob) {
-        for (api in job.fuzzingRequests) {
+        connectionToDynamo.sendMessage("Ack")
+
+        var apiRequest = connectionToDynamo.receiveMessage()
+        while (apiRequest != "Ack") {
+            val api = Json.decodeFromString(ContentProviderApi.serializer(), apiRequest)
             val result: FuzzingResult = fuzzApi(api)
             sendResult(result)
+
+            apiRequest = connectionToDynamo.receiveMessage()
         }
     }
 
     private fun sendResult(result: FuzzingResult) {
         val json = FuzzingResultSerializer.toJson(result)
         connectionToDynamo.sendMessage(json)
-        waitForAck()
-    }
-
-    private fun waitForAck(): Boolean {
-        val feedback = connectionToDynamo.receiveMessage()
-        val isAck = feedback == MESSAGE_ACK
-        if (!isAck) {
-            Log.e(TAG, "Ack expected, but got $feedback")
-        }
-        return isAck
     }
 }
